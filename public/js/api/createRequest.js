@@ -3,34 +3,62 @@
  * на сервер.
  * */
 const createRequest = (options = {}) => {
-    let xhr = new XMLHttpRequest();
-    xhr.responseType = "json";
-    let { url, data, method, callback } = options;
-    let formData = new FormData();
-    
-    if (options.method == "GET") {
-        url = url + "?";
-        for (let key in data) {
-        url += key + "=" + data[key] + "&";
-        }
-        url = url.slice(0, -1);
-    } else {
-        for (let key in data) {
-        formData.append(key, data[key]);
-        }
+  const f = function () {},
+      {
+          method = 'GET',
+          headers = {},
+          success = f,
+          error = f,
+          callback = f,
+          responseType,
+          async = true,
+          data = {}
+      } = options,
+      xhr = new XMLHttpRequest;
+
+  let { url } = options;
+
+  let requestData;
+  if (responseType) {
+      xhr.responseType = responseType;
   }
+  xhr.onload = function() {
+      success.call( this, xhr.response );
+      callback.call( this, null, xhr.response );
+  };
+  xhr.onerror = function() {
+      const err = new Error( 'Request Error' );
+      error.call( this, err );
+      callback.call( this, err );
+  };
 
-  xhr.open(options.method, url);
-  xhr.send(formData);
+  xhr.withCredentials = true;
 
-  try {
-    xhr.addEventListener("readystatechange", function () {
-      if (this.readyState == xhr.DONE && xhr.status === 200) {
-        options.callback(xhr.response.error, xhr.response);
+  if ( method === 'GET' ) {
+      const urlParams = Object.entries( data )
+          .map(([ key, value ]) => `${key}=${value}` )
+          .join( '&' );
+      if ( urlParams ) {
+          url += '?' + urlParams;
       }
-    });
-  } catch (error) {
-    options.callback(error);
   }
+  else {
+      requestData = Object.entries( data )
+          .reduce(( target, [ key, value ]) => {
+              target.append( key, value );
+              return target;
+          }, new FormData );
+  }
+  try {
+      xhr.open( method, url, async );
+      xhr.send( requestData );
+  }
+  catch ( err ) {
+      error.call( this, err );
+      callback.call( this, err );
+      return xhr;
+  }
+
+  return xhr;
 };
 

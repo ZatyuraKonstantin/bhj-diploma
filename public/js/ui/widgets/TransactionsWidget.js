@@ -12,11 +12,12 @@ class TransactionsWidget {
    * необходимо выкинуть ошибку.
    * */
   constructor( element ) {
-    if (!element) {
-      throw new Error("Элемент не существует");
+    if ( !element ) {
+      throw new Error( 'Элемент не существует' );
     }
 
     this.element = element;
+
     this.registerEvents();
   }
   /**
@@ -26,15 +27,13 @@ class TransactionsWidget {
    * экземпляра окна
    * */
   registerEvents() {
-    const createIncomeBtn = this.element.querySelector('.create-income-button');
-    const createExpenseBtn = this.element.querySelector('.create-expense-button');
+    const createIncomeButton = this.element.querySelector( '.create-income-button' ),
+        createExpenseButton = this.element.querySelector( '.create-expense-button' ),
 
-    createIncomeBtn.addEventListener('click', () => {
-      App.getModal('newIncome').open();
-    });
+        incomeModal = new Modal( document.querySelector( '#modal-new-income' )),
+        expenseModal = new Modal( document.querySelector( '#modal-new-expense' ));
 
-    createExpenseBtn.addEventListener('click', () => {
-      App.getModal('newExpense').open();
-    });
+    createIncomeButton.addEventListener( 'click', () => incomeModal.open());
+    createExpenseButton.addEventListener( 'click', () => expenseModal.open());
   }
 }

@@ -12,12 +12,11 @@ class Modal {
    * необходимо выкинуть ошибку.
    * */
   constructor(element){
-    const currentUser = User.current();
-    if (!currentUser) {
-      return;
+    if ( !element ) {
+      throw new Error( 'Элемент не существует' );
     }
-
-    this.element.querySelector('.user-name').textContent = currentUser.name;
+    this.element = element;
+    this.registerEvents();
   }
 
   /**
@@ -26,10 +25,9 @@ class Modal {
    * (с помощью метода Modal.onClose)
    * */
   registerEvents() {
-    for (let btn of this.element.querySelectorAll('[data-dismiss="modal"]')) {
-      btn.addEventListener("click", (e) => {
-        this.onClose(e);
-      });
+    this.onClose = this.onClose.bind( this );
+    this.element.addEventListener( 'click', this.onClose );
+    return this;
   }
 
   /**
@@ -37,20 +35,25 @@ class Modal {
    * Закрывает текущее окно (Modal.close())
    * */
   onClose(e) {
-    e.preventDefault();
-    this.close();
+    const target = e.target.closest( '[data-dismiss="modal"]' );
+    if ( target ) {
+      e.preventDefault();
+      return this.close();
+    }
   }
   /**
    * Открывает окно: устанавливает CSS-свойство display
    * со значением «block»
    * */
   open() {
-    this.element.style.display = "block";
+    this.element.style.display = 'block';
+    return this;
   }
   /**
    * Закрывает окно: удаляет CSS-свойство display
    * */
-  close(){
-    this.element.style.display = "none";
+  close() {
+    this.element.style.display = '';
+    return this;
   }
 }
